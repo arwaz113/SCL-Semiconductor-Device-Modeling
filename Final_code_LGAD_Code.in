@@ -1,0 +1,67 @@
+go athena 
+
+
+# MESH SPECIFICATIONS*******************************************************
+#x.m l=0 sp=0.5
+#x.m l=1 sp=0.5
+
+line x location=0 			        spacing=0.5
+line x location=100			        spacing=0.5
+
+
+line y loc=0.00            spac=0.005
+line y loc=0.1             spac=0.005  
+line y loc=0.2             spac=0.01   
+line y loc=0.5             spac=0.02
+line y loc=2.0             spac=0.05
+line y loc=5.0             spac=0.1   
+line y loc=20              spac=10
+line y loc=300             spac=10
+# 
+init silicon boron resistivity=5000 orientation=100 two.d
+# --- Double GAIN LAYER ---
+
+Implant boron dose=1.7e13 energy=150 tilt=7 rotation=0
+Implant boron dose=1.3e12 energy=180 tilt=7 rotation=0
+
+Diffuse time=200 temperature=1050 F.N2=10
+
+Implant phosphorus dose=1e15  energy=70 tilt=7 rotation=0
+#Implant phosphorus dose=2.5e15  energy=65 tilt=7 rotation=0
+
+##PD (N+) Anneal
+Diffuse time=120 temperature=1050  F.N2=10 
+#
+#structure outfile=1D_LGAD1.str
+
+deposit aluminum thick=0.8 
+
+electrode name=anode backside 
+electrode name=cathode  
+
+structure outfile=1D_LGAD_DoubleGain.str
+
+go atlas 
+
+mesh infile=1D_LGAD_DoubleGain.str
+
+models srh conmob bgn auger fldmob 
+
+impact selber
+
+method newton itlimit=25 climit=1e-4 carriers=2 maxtrap=10
+#
+
+solve init
+
+#log outfile=trial_Wgrd300um_grd3_550um_grd3iso200um.log
+solve vcathode=0.01
+solve vcathode=0.1 
+log outfile=1D_LGAD_DoubleGain.log
+solve vcathode=1 vstep=10 vfinal=400 name=cathode compl=1e-7 cname=cathode
+
+save outfile=1D_LGAD_DoubleGain_2.str
+
+
+#extract name="BV_trial_Wgrd300um_grd3_550um_grd3iso200um" x.val from curve(abs(v."cathode"),abs(i."cathode")) where y.val = 1.0e-7
+
